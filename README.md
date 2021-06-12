@@ -29,7 +29,7 @@ c. Choose ymin and ymax from our region of interest and then find the correspond
 Below are some of the failed attempts the learninig that I derived from them
 1. To separate line segments into left and right lane I tried using avergae of x as the separator. While this worked great for a single image this didn't work so well while using vidoes. Some points was being misclassified causing errorneous line segements to appear.
 
-[image1]: ./test_images_output/solidWhiteRight.jpg "Lane Finder example"
+![Combined Image](./test_images_output/solidWhiteRight.jpg "COmbined Image")
 
 ### 2. Identify potential shortcomings with your current pipeline
 
