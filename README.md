@@ -1,58 +1,44 @@
-# udacity-p1-lane-lines
-Submissing 
-=======
 # **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
-
-Overview
+# Author: Anirudh Kumar Agrawal
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+**Finding Lane Lines on the Road**
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+The goals / steps of this project are the following:
+* Make a pipeline that finds lane lines on the road
+* Reflect on your work in a written report
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
-
-
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
-
-1. Describe the pipeline
-
-2. Identify any shortcomings
-
-3. Suggest possible improvements
-
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
-
-
-The Project
 ---
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+### Reflection
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) if you haven't already.
+### 1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-**Step 2:** Open the code in a Jupyter Notebook
+My pipeline consisted of 5 steps.
+1. Conver a RGB image to grayscale, this is done to be able to apply a gradient based edge detector
+2. Use Gaussian Blurring, the idea of gaussian blur is reduce hte impact of noise in the image. Noise can be introduced to a variety of reasons ranging from faulty camera or low resolution camera. The reason that would affect the current task is that because noisy pixels will affect edge detection algorithm
+3. Use Canny Edge Detector, it is gradient based Edge Detector. The idea is to find gradeint at each pixel and then find pixels which have gradient given above the thresholds. The two thresholds are used to classify weak and strong edge pixels.
+4. Apply Hough transform, which be able to identify points belonging to a line by converting the image to Hough space.
+5. Combine the individual line segements to a single left and right lane. This is describe in detail in the coming section
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out [Udacity's free course on Anaconda and Jupyter Notebooks](https://classroom.udacity.com/courses/ud1111) to get started.
+In order to draw a single line on the left and right lanes,
+a. Partition the line segments into left and right lane. For the current image set this could be done by comparding slopes of the line segments. Left lane has negative slope while hte right lane has positive slope( this might be non-intuititve seeing the image but this is so because y-axis is inverted in opencv space)
+b. Run a polynomial line fitting algorithm on the given points. I have used NumPy polyfit algorithm
+c. Choose ymin and ymax from our region of interest and then find the corresponding x values, this will use line segement extending over the full Region of Interest
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
+Below are some of the failed attempts the learninig that I derived from them
+1. To separate line segments into left and right lane I tried using avergae of x as the separator. While this worked great for a single image this didn't work so well while using vidoes. Some points was being misclassified causing errorneous line segements to appear.
 
-`> jupyter notebook`
+![image text](test_image_output/solidWhiteRight.jpg "Lane for Solid White Right")
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+### 2. Identify potential shortcomings with your current pipeline
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+There a few shortcomings in the current pipeline as used
+1. Clipping of the image is very subjective to given dataset and isn't universal. It will be an entire task to identify which the part of hte image should be our region of interest.
+2. The algorithm can't handle curved lines right now
+3. If there is a car also very close to lines and white in the color it impacts algorithm. In the curren task this was overcome by definining a very tight Region of Interest
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+### 3. Suggest possible improvements to your pipeline
+
+Possible improvements to the current pipeline could be the following
+1. Instead of using an line approximation we can use higher order curve fitting algorithm, to accomodate this with hough transform we we will have set values such that its able to give very small line segments.
